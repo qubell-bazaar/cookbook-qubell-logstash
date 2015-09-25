@@ -1,0 +1,1 @@
+# cookbook-qubell-logstash
