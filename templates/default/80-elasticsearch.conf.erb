@@ -1,0 +1,2 @@
+<%= node['qubell_logstash']['user'] %> soft nofile <%= node['elasticsearch']['file_limits'] %>
+<%= node['qubell_logstash']['user'] %> hard nofile <%= node['elasticsearch']['file_limits'] %>

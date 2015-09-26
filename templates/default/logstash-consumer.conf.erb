@@ -1,0 +1,86 @@
+input {
+#  tcp {
+ #   codec => "json"
+ #   mode => "server"
+ #   host => "0.0.0.0"
+ #   port => 8514
+ #   ssl_enable => true
+ #   ssl_cert => "/var/lib/logstash/server.pem"
+ #   ssl_key => "/var/lib/logstash/server.key"
+ #   ssl_verify => false
+ #   type => "nxlog"
+ # }
+  <% @inputs.each do |input_map| %>
+    <% input_map.each do |input_type, input_body| %>
+      <%= input_type %> {
+        <% input_body.each do |key, value| %>
+          <%= key %> => <%= value.inspect %>
+        <% end %>
+      }
+    <% end %>
+  <% end %>
+}
+filter {
+
+  if [type] == "apache-access" {
+     grok {
+        match => [ "message", "%{COMBINEDAPACHELOG}" ]
+        add_field => [ "from", "apache-%{host}" ]
+     }
+  }
+  if [type] == "apache-error" {   
+     grok {
+        match => [ "message", "\[%{DAY} %{MONTH} %{MONTHDAY} %{TIME} %{YEAR}\] \[%{WORD:severity}\] %{GREEDYDATA:message_remainder}" ]
+        add_field => [ "from", "apache-%{host}" ]    
+     }
+  }
+  if [type] == "weblogic" {
+    multiline {
+        type => "weblogic"
+        pattern => "^####"
+        negate => true
+        what => "previous"
+    }
+    multiline {
+        type => "application"
+        pattern => "^20"
+        negate => true
+        what => "previous"
+    }
+  }
+
+  # tomcat 
+  if [type] == "tomcat-access" {
+    grok {
+    match => [ "message", "%{IP:client} %{GREEDYDATA}|\- %{GREEDYDATA}|\- \[%{MONTHDAY}/%{MONTH}/%{YEAR}:%{TIME} \+%{INT}\] \"%{GREEDYDATA}" ] 
+    add_field => ["from", "tomcat-%{host}"]    
+    }
+  }
+  if [type] == "tomcat-catalina" {
+      multiline {
+        patterns_dir => "/var/lib/logstash/patterns"
+        pattern => "(^%{TOMCAT_DATESTAMP})|(^%{CATALINA_DATESTAMP})"
+        negate => true
+        what => "previous"
+      }
+      grok {
+        patterns_dir => "/var/lib/logstash/patterns"
+        match => [ "message", "%{TOMCATLOG}", "message", "%{CATALINALOG}" ]
+        add_field => ["from", "tomcat-%{host}"]  
+      }
+  }
+}
+
+output {
+stdout { debug => true }
+  <% @outputs.each do |output_map| %>
+    <% output_map.each do |output_type, output_body| %>
+      <%= output_type %> {
+        <% output_body.each do |key, value| %>
+          <%= key %> => <%= value.inspect %>
+        <% end %>
+      }
+   <% end %>
+<% end %>
+
+}
