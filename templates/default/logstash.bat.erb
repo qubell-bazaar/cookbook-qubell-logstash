@@ -1,0 +1,1 @@
+java.exe -Xmx512M -jar <%= @root_dir %>\logstash.jar agent -f <%= @root_dir_mod %>/logstash.conf <%= @loglevel %> <%= @extra_args %> > <%= node['qubell_logstash']['logs'] %>\logstash-console.log

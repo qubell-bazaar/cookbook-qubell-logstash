@@ -1,0 +1,16 @@
+
+
+WLS_DATESTAMP %{YEAR}[/-]%{MONTHNUM}[/-]%{MONTHDAY}[- ]%{TIME}
+
+ WLS_SRV_LOG_FMT1 ####<%{DATA:wls_timestamp}> <%{WORD:severity}> <%{DATA:wls_topic}> <%{HOST:hostname}> <(%{WORD:server})?>( <(\[%{DATA:thread_status}\] )?ExecuteThread: '%{INT:thread_nr}' for queue: '%{DATA:thread_queue}'>)? %{GREEDYDATA:logmessage}
+ 
+ WLS_SRV_LOG_FMT2 ####<%{DATA:wls_timestamp}> <%{WORD:severity}> <%{DATA:wls_topic}> <%{HOST:hostname}> <(%{WORD:server})?> %{GREEDYDATA:logmessage}
+ WLS_SRV_LOG %{WLS_SRV_LOG_FMT1}|%{WLS_SRV_LOG_FMT2}
+ 
+ WLS_APP_LOG_FMT1 %{WLS_DATESTAMP:timestamp}(?: %{NUMBER:some_id})? %{WORD:severity} ( )?\[%{JAVACLASS:java_class}\](:)?( \(\[%{DATA:thread_status}\] ExecuteThread: '%{INT:thread_nr}' for queue: '%{DATA:thread_queue}':\))? %{DATA:logmessage}$
+ WLS_APP_LOG_FMT2 %{WLS_DATESTAMP:timestamp}(?: %{NUMBER:some_id})? %{WORD:severity} ( )?\[%{JAVACLASS:java_class}\](:)? %{GREEDYDATA:logmessage}
+ WLS_APP_LOG %{WLS_APP_LOG_FMT1}|%{WLS_APP_LOG_FMT1}
+
+ WLS_SERVERS server[0-9]{2}
+ WLS_APPS a|list|of|valid|application|names
+ WLS_ENVS dev[0-9]{2}|int|qsu|au[1-5]|prosi|prod
